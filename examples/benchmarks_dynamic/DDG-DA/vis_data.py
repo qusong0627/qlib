@@ -1,13 +1,12 @@
 import pickle
-import numpy as np
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 sns.set(color_codes=True)
-plt.rcParams["font.sans-serif"] = "SimHei"
+plt.rcParams["font.sans-seri"] = "SimHei"
 plt.rcParams["axes.unicode_minus"] = False
-from tqdm.auto import tqdm
 
 # tqdm.pandas()  # for progress_apply
 # %matplotlib inline

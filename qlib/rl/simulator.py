@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TYPE_CHECKING, TypeVar
 
 from .seed import InitialStateType
 

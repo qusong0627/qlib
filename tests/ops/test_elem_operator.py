@@ -1,11 +1,12 @@
 import unittest
+
 import numpy as np
 import pytest
 
+from qlib.config import C
 from qlib.data import DatasetProvider
 from qlib.data.data import ExpressionD
-from qlib.tests import TestOperatorData, TestMockData, MOCK_DF
-from qlib.config import C
+from qlib.tests import MOCK_DF, TestMockData, TestOperatorData
 
 
 class TestElementOperator(TestMockData):
@@ -18,7 +19,9 @@ class TestElementOperator(TestMockData):
 
     def test_Abs(self):
         field = "Abs($close-Ref($close, 1))"
-        result = ExpressionD.expression(self.instrument, field, self.start_time, self.end_time, self.freq)
+        result = ExpressionD.expression(
+            self.instrument, field, self.start_time, self.end_time, self.freq
+        )
         self.assertGreaterEqual(result.min(), 0)
         result = result.to_numpy()
         prev_close = self.mock_df["close"].shift(1)
@@ -29,7 +32,9 @@ class TestElementOperator(TestMockData):
 
     def test_Sign(self):
         field = "Sign($close-Ref($close, 1))"
-        result = ExpressionD.expression(self.instrument, field, self.start_time, self.end_time, self.freq)
+        result = ExpressionD.expression(
+            self.instrument, field, self.start_time, self.end_time, self.freq
+        )
         result = result.to_numpy()
         prev_close = self.mock_df["close"].shift(1)
         close = self.mock_df["close"]
@@ -55,7 +60,14 @@ class TestInstElementOperator(TestOperatorData):
         ]
         columns = ["change", "abs"]
         self.data = DatasetProvider.inst_calculator(
-            self.inst, self.start_time, self.end_time, freq, expressions, self.spans, C, []
+            self.inst,
+            self.start_time,
+            self.end_time,
+            freq,
+            expressions,
+            self.spans,
+            C,
+            [],
         )
         self.data.columns = columns
 

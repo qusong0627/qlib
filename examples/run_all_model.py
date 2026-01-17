@@ -1,27 +1,28 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT License.
 
-import os
-import sys
-import fire
-import time
+import functools
 import glob
+import inspect
+import os
 import shutil
 import signal
-import inspect
-import tempfile
-import functools
 import statistics
 import subprocess
+import sys
+import tempfile
+import time
 from datetime import datetime
-from ruamel.yaml import YAML
-from pathlib import Path
 from operator import xor
+from pathlib import Path
 from pprint import pprint
 
+import fire
+from ruamel.yaml import YAML
+
 import qlib
-from qlib.workflow import R
 from qlib.tests.data import GetData
+from qlib.workflow import R
 
 
 # decorator to check the arguments
@@ -31,11 +32,14 @@ def only_allow_defined_args(function_to_decorate):
         """Internal wrapper function."""
         argspec = inspect.getfullargspec(function_to_decorate)
         valid_names = set(argspec.args + argspec.kwonlyargs)
-        if "self" in valid_names:
-            valid_names.remove("self")
+        if "sel" in valid_names:
+            valid_names.remove("sel")
         for arg_name in kwargs:
             if arg_name not in valid_names:
-                raise ValueError("Unknown argument seen '%s', expected: [%s]" % (arg_name, ", ".join(valid_names)))
+                raise ValueError(
+                    "Unknown argument seen '%s', expected: [%s]"
+                    % (arg_name, ", ".join(valid_names))
+                )
         return function_to_decorate(*args, **kwargs)
 
     return _return_wrapped
@@ -55,8 +59,16 @@ def cal_mean_std(results) -> dict:
     for fn in results:
         mean_std[fn] = dict()
         for metric in results[fn]:
-            mean = statistics.mean(results[fn][metric]) if len(results[fn][metric]) > 1 else results[fn][metric][0]
-            std = statistics.stdev(results[fn][metric]) if len(results[fn][metric]) > 1 else 0
+            mean = (
+                statistics.mean(results[fn][metric])
+                if len(results[fn][metric]) > 1
+                else results[fn][metric][0]
+            )
+            std = (
+                statistics.stdev(results[fn][metric])
+                if len(results[fn][metric]) > 1
+                else 0
+            )
             mean_std[fn][metric] = [mean, std]
     return mean_std
 
@@ -71,14 +83,18 @@ def create_env():
     python_path = env_path / "bin" / "python"  # TODO: FIX ME!
     sys.stderr.write("\n")
     # get anaconda activate path
-    conda_activate = Path(os.environ["CONDA_PREFIX"]) / "bin" / "activate"  # TODO: FIX ME!
+    conda_activate = (
+        Path(os.environ["CONDA_PREFIX"]) / "bin" / "activate"
+    )  # TODO: FIX ME!
     return temp_dir, env_path, python_path, conda_activate
 
 
 # function to execute the cmd
 def execute(cmd, wait_when_err=False, raise_err=True):
     print("Running CMD:", cmd)
-    with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True) as p:
+    with subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True
+    ) as p:
         for line in p.stdout:
             sys.stdout.write(line.split("\b")[0])
             if "\b" in line:
@@ -107,7 +123,9 @@ def get_all_folders(models, exclude) -> dict:
     elif models is None:
         models = [f.name.lower() for f in os.scandir("benchmarks")]
     else:
-        raise ValueError("Input models type is not supported. Please provide str or list without space.")
+        raise ValueError(
+            "Input models type is not supported. Please provide str or list without space."
+        )
     for f in os.scandir("benchmarks"):
         add = xor(bool(f.name.lower() in models), bool(exclude))
         if add:
@@ -121,7 +139,7 @@ def get_all_files(folder_path, dataset, universe="") -> (str, str):
     if universe != "":
         universe = f"_{universe}"
     yaml_path = str(Path(f"{folder_path}") / f"*{dataset}{universe}.yaml")
-    req_path = str(Path(f"{folder_path}") / f"*.txt")
+    req_path = str(Path(f"{folder_path}") / "*.txt")
     yaml_file = glob.glob(yaml_path)
     req_file = glob.glob(req_path)
     if len(yaml_file) == 0:
@@ -155,9 +173,15 @@ def get_all_results(folders) -> dict:
                 if "1day.excess_return_with_cost.annualized_return" not in metrics:
                     print(f"{recorder_id} is skipped due to incomplete result")
                     continue
-                result["annualized_return_with_cost"].append(metrics["1day.excess_return_with_cost.annualized_return"])
-                result["information_ratio_with_cost"].append(metrics["1day.excess_return_with_cost.information_ratio"])
-                result["max_drawdown_with_cost"].append(metrics["1day.excess_return_with_cost.max_drawdown"])
+                result["annualized_return_with_cost"].append(
+                    metrics["1day.excess_return_with_cost.annualized_return"]
+                )
+                result["information_ratio_with_cost"].append(
+                    metrics["1day.excess_return_with_cost.information_ratio"]
+                )
+                result["max_drawdown_with_cost"].append(
+                    metrics["1day.excess_return_with_cost.max_drawdown"]
+                )
                 result["ic"].append(metrics["IC"])
                 result["icir"].append(metrics["ICIR"])
                 result["rank_ic"].append(metrics["Rank IC"])
@@ -324,14 +348,18 @@ class ModelRunner:
             if "torch" in content:
                 # automatically install pytorch according to nvidia's version
                 execute(
-                    f"{python_path} -m pip install light-the-torch", wait_when_err=wait_when_err
+                    f"{python_path} -m pip install light-the-torch",
+                    wait_when_err=wait_when_err,
                 )  # for automatically installing torch according to the nvidia driver
                 execute(
                     f"{env_path / 'bin' / 'ltt'} install --install-cmd '{python_path} -m pip install {{packages}}' -- -r {req_path}",
                     wait_when_err=wait_when_err,
                 )
             else:
-                execute(f"{python_path} -m pip install -r {req_path}", wait_when_err=wait_when_err)
+                execute(
+                    f"{python_path} -m pip install -r {req_path}",
+                    wait_when_err=wait_when_err,
+                )
             sys.stderr.write("\n")
 
             # read yaml, remove seed kwargs of model, and then save file in the temp_dir
@@ -345,8 +373,14 @@ class ModelRunner:
                 sys.stderr.write("\n")
             # install qlib
             sys.stderr.write("Installing qlib...\n")
-            execute(f"{python_path} -m pip install --upgrade pip", wait_when_err=wait_when_err)  # TODO: FIX ME!
-            execute(f"{python_path} -m pip install --upgrade cython", wait_when_err=wait_when_err)  # TODO: FIX ME!
+            execute(
+                f"{python_path} -m pip install --upgrade pip",
+                wait_when_err=wait_when_err,
+            )  # TODO: FIX ME!
+            execute(
+                f"{python_path} -m pip install --upgrade cython",
+                wait_when_err=wait_when_err,
+            )  # TODO: FIX ME!
             if fn == "TFT":
                 execute(
                     f"cd {env_path} && {python_path} -m pip install --upgrade --force-reinstall --ignore-installed PyYAML -e {qlib_uri}",
@@ -376,27 +410,34 @@ class ModelRunner:
                 input("Press Enter to Continue")
             shutil.rmtree(env_path)
         # print errors
-        sys.stderr.write(f"Here are some of the errors of the models...\n")
+        sys.stderr.write("Here are some of the errors of the models...\n")
         pprint(errors)
         self._collect_results(exp_folder_name, dataset)
 
     def _collect_results(self, exp_folder_name, dataset):
         folders = get_all_folders(exp_folder_name, dataset)
         # getting all results
-        sys.stderr.write(f"Retrieving results...\n")
+        sys.stderr.write("Retrieving results...\n")
         results = get_all_results(folders)
         if len(results) > 0:
             # calculating the mean and std
-            sys.stderr.write(f"Calculating the mean and std of results...\n")
+            sys.stderr.write("Calculating the mean and std of results...\n")
             results = cal_mean_std(results)
             # generating md table
-            sys.stderr.write(f"Generating markdown table...\n")
+            sys.stderr.write("Generating markdown table...\n")
             gen_and_save_md_table(results, dataset)
             sys.stderr.write("\n")
         sys.stderr.write("\n")
         # move results folder
-        shutil.move(exp_folder_name, exp_folder_name + f"_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}")
-        shutil.move("table.md", f"table_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.md")
+        shutil.move(
+            exp_folder_name,
+            exp_folder_name
+            + f"_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}",
+        )
+        shutil.move(
+            "table.md",
+            f"table_{dataset}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.md",
+        )
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Generator, Iterable, Optional, OrderedDict, Tuple, cast
+from typing import Any, cast, Dict, Generator, Iterable, Optional, OrderedDict, Tuple
 
 import gym
 import numpy as np
@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from gym.spaces import Discrete
 from tianshou.data import Batch, ReplayBuffer, to_torch
-from tianshou.policy import BasePolicy, PPOPolicy, DQNPolicy
+from tianshou.policy import BasePolicy, DQNPolicy, PPOPolicy
 
 from qlib.rl.trainer.trainer import Trainer
 
@@ -49,7 +49,12 @@ class AllOne(NonLearnablePolicy):
     Useful when implementing some baselines (e.g., TWAP).
     """
 
-    def __init__(self, obs_space: gym.Space, action_space: gym.Space, fill_value: float | int = 1.0) -> None:
+    def __init__(
+        self,
+        obs_space: gym.Space,
+        action_space: gym.Space,
+        fill_value: float | int = 1.0,
+    ) -> None:
         super().__init__(obs_space, action_space)
 
         self.fill_value = fill_value
@@ -70,7 +75,9 @@ class PPOActor(nn.Module):
     def __init__(self, extractor: nn.Module, action_dim: int) -> None:
         super().__init__()
         self.extractor = extractor
-        self.layer_out = nn.Sequential(nn.Linear(cast(int, extractor.output_dim), action_dim), nn.Softmax(dim=-1))
+        self.layer_out = nn.Sequential(
+            nn.Linear(cast(int, extractor.output_dim), action_dim), nn.Softmax(dim=-1)
+        )
 
     def forward(
         self,

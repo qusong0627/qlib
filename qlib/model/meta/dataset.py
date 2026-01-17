@@ -2,8 +2,10 @@
 # Licensed under the MIT License.
 
 import abc
+from typing import Dict, List, Text, Tuple, Union
+
 from qlib.model.meta.task import MetaTask
-from typing import Dict, Union, List, Tuple, Text
+
 from ...utils.serial import Serializable
 
 
@@ -36,7 +38,9 @@ class MetaTaskDataset(Serializable, metaclass=abc.ABCMeta):
         super().__init__(*args, **kwargs)
         self.segments = segments
 
-    def prepare_tasks(self, segments: Union[List[Text], Text], *args, **kwargs) -> List[MetaTask]:
+    def prepare_tasks(
+        self, segments: Union[List[Text], Text], *args, **kwargs
+    ) -> List[MetaTask]:
         """
         Prepare the data in each meta-task and ready for training.
 
@@ -63,7 +67,7 @@ class MetaTaskDataset(Serializable, metaclass=abc.ABCMeta):
         elif isinstance(segments, str):
             return self._prepare_seg(segments)
         else:
-            raise NotImplementedError(f"This type of input is not supported")
+            raise NotImplementedError("This type of input is not supported")
 
     @abc.abstractmethod
     def _prepare_seg(self, segment: Text):

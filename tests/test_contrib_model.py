@@ -11,9 +11,13 @@ class TestAllFlow(unittest.TestCase):
         num = 0
         for model_class in all_model_classes:
             if model_class is not None:
-                model = model_class()
+                model_class()
                 num += 1
-        print("There are {:}/{:} valid models in total.".format(num, len(all_model_classes)))
+        print(
+            "There are {:}/{:} valid models in total.".format(
+                num, len(all_model_classes)
+            )
+        )
 
 
 def suite():

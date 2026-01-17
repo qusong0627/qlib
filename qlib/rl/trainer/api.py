@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Sequence, cast
+from typing import Any, Callable, cast, Dict, List, Sequence
 
 from tianshou.policy import BasePolicy
 

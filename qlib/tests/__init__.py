@@ -1,88 +1,97 @@
-from typing import Union, List, Dict, Tuple
-import unittest
-import pandas as pd
-import numpy as np
-import io
+import io 
+import unittest 
+from typing import Dict ,List ,Tuple ,Union 
 
-from .data import GetData
-from .. import init
-from ..constant import REG_CN, REG_TW
-from qlib.data.filter import NameDFilter
-from qlib.data import D
-from qlib.data.data import Cal, DatasetD
-from qlib.data.storage import CalendarStorage, InstrumentStorage, FeatureStorage, CalVT, InstKT, InstVT
+import numpy as np 
+import pandas as pd 
+
+from qlib .data import D 
+from qlib .data .data import Cal ,DatasetD 
+from qlib .data .filter import NameDFilter 
+from qlib .data .storage import (
+CalendarStorage ,
+CalVT ,
+FeatureStorage ,
+InstKT ,
+InstrumentStorage ,
+InstVT ,
+)
+
+from ..import init 
+from ..constant import REG_CN ,REG_TW 
+from .data import GetData 
 
 
-class TestAutoData(unittest.TestCase):
-    _setup_kwargs = {}
-    provider_uri = "~/.qlib/qlib_data/cn_data_simple"  # target_dir
-    provider_uri_1day = "~/.qlib/qlib_data/cn_data"  # target_dir
-    provider_uri_1min = "~/.qlib/qlib_data/cn_data_1min"
+class TestAutoData (unittest .TestCase ):
+    _setup_kwargs ={}
+    provider_uri ="~/.qlib/qlib_data/cn_data_simple"# target_dir
+    provider_uri_1day ="~/.qlib/qlib_data/cn_data"# target_dir
+    provider_uri_1min ="~/.qlib/qlib_data/cn_data_1min"
 
-    @classmethod
-    def setUpClass(cls, enable_1d_type="simple", enable_1min=False) -> None:
-        # use default data
+    @classmethod 
+    def setUpClass (cls ,enable_1d_type ="simple",enable_1min =False )->None :
+    # use default data
 
-        if enable_1d_type == "simple":
-            provider_uri_day = cls.provider_uri
-            name_day = "qlib_data_simple"
-        elif enable_1d_type == "full":
-            provider_uri_day = cls.provider_uri_1day
-            name_day = "qlib_data"
-        else:
-            raise NotImplementedError(f"This type of input is not supported")
+        if enable_1d_type =="simple":
+            provider_uri_day =cls .provider_uri 
+            name_day ="qlib_data_simple"
+        elif enable_1d_type =="full":
+            provider_uri_day =cls .provider_uri_1day 
+            name_day ="qlib_data"
+        else :
+            raise NotImplementedError ("This type of input is not supported")
 
-        GetData().qlib_data(
-            name=name_day,
-            region=REG_CN,
-            interval="1d",
-            target_dir=provider_uri_day,
-            delete_old=False,
-            exists_skip=True,
+        GetData ().qlib_data (
+        name =name_day ,
+        region =REG_CN ,
+        interval ="1d",
+        target_dir =provider_uri_day ,
+        delete_old =False ,
+        exists_skip =True ,
         )
 
-        if enable_1min:
-            GetData().qlib_data(
-                name="qlib_data",
-                region=REG_CN,
-                interval="1min",
-                target_dir=cls.provider_uri_1min,
-                delete_old=False,
-                exists_skip=True,
+        if enable_1min :
+            GetData ().qlib_data (
+            name ="qlib_data",
+            region =REG_CN ,
+            interval ="1min",
+            target_dir =cls .provider_uri_1min ,
+            delete_old =False ,
+            exists_skip =True ,
             )
 
-        provider_uri_map = {"1min": cls.provider_uri_1min, "day": provider_uri_day}
-        init(
-            provider_uri=provider_uri_map,
-            region=REG_CN,
-            expression_cache=None,
-            dataset_cache=None,
-            **cls._setup_kwargs,
+        provider_uri_map ={"1min":cls .provider_uri_1min ,"day":provider_uri_day }
+        init (
+        provider_uri =provider_uri_map ,
+        region =REG_CN ,
+        expression_cache =None ,
+        dataset_cache =None ,
+        **cls ._setup_kwargs ,
         )
 
 
-class TestOperatorData(TestAutoData):
-    @classmethod
-    def setUpClass(cls, enable_1d_type="simple", enable_1min=False) -> None:
-        # use default data
-        super().setUpClass(enable_1d_type, enable_1min)
-        nameDFilter = NameDFilter(name_rule_re="SH600110")
-        instruments = D.instruments("csi300", filter_pipe=[nameDFilter])
-        start_time = "2005-01-04"
-        end_time = "2005-12-31"
-        freq = "day"
+class TestOperatorData (TestAutoData ):
+    @classmethod 
+    def setUpClass (cls ,enable_1d_type ="simple",enable_1min =False )->None :
+    # use default data
+        super ().setUpClass (enable_1d_type ,enable_1min )
+        nameDFilter =NameDFilter (name_rule_re ="SH600110")
+        instruments =D .instruments ("csi300",filter_pipe =[nameDFilter ])
+        start_time ="2005-01-04"
+        end_time ="2005-12-31"
+        freq ="day"
 
-        instruments_d = DatasetD.get_instruments_d(instruments, freq)
-        cls.instruments_d = instruments_d
-        cal = Cal.calendar(start_time, end_time, freq)
-        cls.cal = cal
-        cls.start_time = cal[0]
-        cls.end_time = cal[-1]
-        cls.inst = list(instruments_d.keys())[0]
-        cls.spans = list(instruments_d.values())[0]
+        instruments_d =DatasetD .get_instruments_d (instruments ,freq )
+        cls .instruments_d =instruments_d 
+        cal =Cal .calendar (start_time ,end_time ,freq )
+        cls .cal =cal 
+        cls .start_time =cal [0 ]
+        cls .end_time =cal [-1 ]
+        cls .inst =list (instruments_d .keys ())[0 ]
+        cls .spans =list (instruments_d .values ())[0 ]
 
 
-MOCK_DATA = """
+MOCK_DATA ="""
 id,symbol,datetime,interval,volume,open,high,low,close
 20275,0050,2022-01-03 00:00:00,day,6761.0,146.0,147.35,146.0,146.4
 20276,0050,2022-01-04 00:00:00,day,9608.0,147.7,149.6,147.7,149.6
@@ -159,131 +168,149 @@ id,symbol,datetime,interval,volume,open,high,low,close
 8601,1101,2022-02-25 00:00:00,day,14556.0,47.2,47.5,46.9,47.35
 """
 
-MOCK_DF = pd.read_csv(io.StringIO(MOCK_DATA), header=0, dtype={"symbol": str})
+MOCK_DF =pd .read_csv (io .StringIO (MOCK_DATA ),header =0 ,dtype ={"symbol":str })
 
 
-class MockStorageBase:
-    def __init__(self, **kwargs):
-        self.df = MOCK_DF
+class MockStorageBase :
+    def __init__ (self ,**kwargs ):
+        self .df =MOCK_DF 
 
 
-class MockCalendarStorage(MockStorageBase, CalendarStorage):
-    def __init__(self, **kwargs):
-        super().__init__()
-        self._data = sorted(self.df["datetime"].unique())
+class MockCalendarStorage (MockStorageBase ,CalendarStorage ):
+    def __init__ (self ,**kwargs ):
+        super ().__init__ ()
+        self ._data =sorted (self .df ["datetime"].unique ())
 
-    @property
-    def data(self) -> List[CalVT]:
-        return self._data
+    @property 
+    def data (self )->List [CalVT ]:
+        return self ._data 
 
-    def __getitem__(self, i: Union[int, slice]) -> Union[CalVT, List[CalVT]]:
-        return self.data[i]
+    def __getitem__ (self ,i :Union [int ,slice ])->Union [CalVT ,List [CalVT ]]:
+        return self .data [i ]
 
-    def __len__(self) -> int:
-        return len(self.data)
-
-
-class MockInstrumentStorage(MockStorageBase, InstrumentStorage):
-    def __init__(self, **kwargs):
-        super().__init__()
-        instruments = {}
-        for symbol, group in self.df.groupby(by="symbol", group_keys=False):
-            start = group["datetime"].iloc[0]
-            end = group["datetime"].iloc[-1]
-            instruments[symbol] = [(start, end)]
-        self._data = instruments
-
-    @property
-    def data(self) -> Dict[InstKT, InstVT]:
-        return self._data
-
-    def __getitem__(self, k: InstKT) -> InstVT:
-        return self.data[k]
-
-    def __len__(self) -> int:
-        return len(self.data)
+    def __len__ (self )->int :
+        return len (self .data )
 
 
-class MockFeatureStorage(MockStorageBase, FeatureStorage):
-    def __init__(self, instrument: str, field: str, freq: str, db_region: str = None, **kwargs):  # type: ignore
-        super().__init__(instrument=instrument, field=field, freq=freq, db_region=db_region, **kwargs)
-        self.field = field
-        calendar = sorted(self.df["datetime"].unique())
-        df_calendar = pd.DataFrame(calendar, columns=["datetime"]).set_index("datetime")
-        df = self.df[self.df["symbol"] == instrument]
-        data_dt_field = "datetime"
-        cal_df = df_calendar[
-            (df_calendar.index >= df[data_dt_field].min()) & (df_calendar.index <= df[data_dt_field].max())
+class MockInstrumentStorage (MockStorageBase ,InstrumentStorage ):
+    def __init__ (self ,**kwargs ):
+        super ().__init__ ()
+        instruments ={}
+        for symbol ,group in self .df .groupby (by ="symbol",group_keys =False ):
+            start =group ["datetime"].iloc [0 ]
+            end =group ["datetime"].iloc [-1 ]
+            instruments [symbol ]=[(start ,end )]
+        self ._data =instruments 
+
+    @property 
+    def data (self )->Dict [InstKT ,InstVT ]:
+        return self ._data 
+
+    def __getitem__ (self ,k :InstKT )->InstVT :
+        return self .data [k ]
+
+    def __len__ (self )->int :
+        return len (self .data )
+
+
+class MockFeatureStorage (MockStorageBase ,FeatureStorage ):
+    def __init__ (self ,instrument :str ,field :str ,freq :str ,db_region :str =None ,**kwargs ):# type: ignore
+        super ().__init__ (
+        instrument =instrument ,field =field ,freq =freq ,db_region =db_region ,**kwargs 
+        )
+        self .field =field 
+        calendar =sorted (self .df ["datetime"].unique ())
+        df_calendar =pd .DataFrame (calendar ,columns =["datetime"]).set_index ("datetime")
+        df =self .df [self .df ["symbol"]==instrument ]
+        data_dt_field ="datetime"
+        cal_df =df_calendar [
+        (df_calendar .index >=df [data_dt_field ].min ())
+        &(df_calendar .index <=df [data_dt_field ].max ())
         ]
-        df = df.set_index(data_dt_field)
-        df_data = df.reindex(cal_df.index)
-        date_index = df_calendar.index.get_loc(df_data.index.min())  # type: ignore
-        df_data.reset_index(inplace=True)
-        df_data.index += date_index
-        self._data = df_data
+        df =df .set_index (data_dt_field )
+        df_data =df .reindex (cal_df .index )
+        date_index =df_calendar .index .get_loc (df_data .index .min ())# type: ignore
+        df_data .reset_index (inplace =True )
+        df_data .index +=date_index 
+        self ._data =df_data 
 
-    @property
-    def data(self) -> pd.Series:
-        return self._data[self.field]
+    @property 
+    def data (self )->pd .Series :
+        return self ._data [self .field ]
 
-    @property
-    def start_index(self) -> Union[int, None]:
-        if self._data.empty:
-            return None
-        return self._data.index[0]
+    @property 
+    def start_index (self )->Union [int ,None ]:
+        if self ._data .empty :
+            return None 
+        return self ._data .index [0 ]
 
-    @property
-    def end_index(self) -> Union[int, None]:
-        if self._data.empty:
-            return None
-        # The next  data appending index point will be  `end_index + 1`
-        return self._data.index[-1]
+    @property 
+    def end_index (self )->Union [int ,None ]:
+        if self ._data .empty :
+            return None 
+            # The next  data appending index point will be  `end_index + 1`
+        return self ._data .index [-1 ]
 
-    def __getitem__(self, i: Union[int, slice]) -> Union[Tuple[int, float], pd.Series]:
-        df = self._data
-        storage_start_index = df.index[0]
-        storage_end_index = df.index[-1]
-        if isinstance(i, int):
-            if storage_start_index > i or i > storage_end_index:
-                raise IndexError(f"{i}: start index is {storage_start_index}")
-            data = self.data[i]
-            return i, data
-        elif isinstance(i, slice):
-            start_index = storage_start_index if i.start is None else i.start
-            end_index = storage_end_index if i.stop is None else i.stop
-            si = max(start_index, storage_start_index)
-            if si > end_index or self.field not in df.columns:
-                return pd.Series(dtype=np.float32)  # type: ignore
-            data = df[self.field].tolist()
-            result = data[si - storage_start_index : end_index - storage_start_index]
-            return pd.Series(result, index=pd.RangeIndex(si, si + len(result)))  # type: ignore
-        else:
-            raise TypeError(f"type(i) = {type(i)}")
+    def __getitem__ (self ,i :Union [int ,slice ])->Union [Tuple [int ,float ],pd .Series ]:
+        df =self ._data 
+        storage_start_index =df .index [0 ]
+        storage_end_index =df .index [-1 ]
+        if isinstance (i ,int ):
+            if storage_start_index >i or i >storage_end_index :
+                raise IndexError (f"{i}: start index is {storage_start_index}")
+            data =self .data [i ]
+            return i ,data 
+        elif isinstance (i ,slice ):
+            start_index =storage_start_index if i .start is None else i .start 
+            end_index =storage_end_index if i .stop is None else i .stop 
+            si =max (start_index ,storage_start_index )
+            if si >end_index or self .field not in df .columns :
+                return pd .Series (dtype =np .float32 )# type: ignore
+            data =df [self .field ].tolist ()
+            result =data [si -storage_start_index :end_index -storage_start_index ]
+            return pd .Series (result ,index =pd .RangeIndex (si ,si +len (result )))# type: ignore
+        else :
+            raise TypeError (f"type(i) = {type(i)}")
 
-    def __len__(self) -> int:
-        return len(self.data)
+    def __len__ (self )->int :
+        return len (self .data )
 
 
-class TestMockData(unittest.TestCase):
-    _setup_kwargs = {
-        "calendar_provider": {
-            "class": "LocalCalendarProvider",
-            "module_path": "qlib.data.data",
-            "kwargs": {"backend": {"class": "MockCalendarStorage", "module_path": "qlib.tests"}},
-        },
-        "instrument_provider": {
-            "class": "LocalInstrumentProvider",
-            "module_path": "qlib.data.data",
-            "kwargs": {"backend": {"class": "MockInstrumentStorage", "module_path": "qlib.tests"}},
-        },
-        "feature_provider": {
-            "class": "LocalFeatureProvider",
-            "module_path": "qlib.data.data",
-            "kwargs": {"backend": {"class": "MockFeatureStorage", "module_path": "qlib.tests"}},
-        },
+class TestMockData (unittest .TestCase ):
+    _setup_kwargs ={
+    "calendar_provider":{
+    "class":"LocalCalendarProvider",
+    "module_path":"qlib.data.data",
+    "kwargs":{
+    "backend":{"class":"MockCalendarStorage","module_path":"qlib.tests"}
+    },
+    },
+    "instrument_provider":{
+    "class":"LocalInstrumentProvider",
+    "module_path":"qlib.data.data",
+    "kwargs":{
+    "backend":{
+    "class":"MockInstrumentStorage",
+    "module_path":"qlib.tests",
+    }
+    },
+    },
+    "feature_provider":{
+    "class":"LocalFeatureProvider",
+    "module_path":"qlib.data.data",
+    "kwargs":{
+    "backend":{"class":"MockFeatureStorage","module_path":"qlib.tests"}
+    },
+    },
     }
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        provider_uri = "Not necessary."
-        init(region=REG_TW, provider_uri=provider_uri, expression_cache=None, dataset_cache=None, **cls._setup_kwargs)
+    @classmethod 
+    def setUpClass (cls )->None :
+        provider_uri ="Not necessary."
+        init (
+        region =REG_TW ,
+        provider_uri =provider_uri ,
+        expression_cache =None ,
+        dataset_cache =None ,
+        **cls ._setup_kwargs ,
+        )

@@ -3,15 +3,14 @@
 
 import sys
 import unittest
-import qlib
 from pathlib import Path
 
+import qlib
+
 sys.path.append(str(Path(__file__).resolve().parent))
-from qlib.data.dataset.loader import NestedDataLoader, QlibDataLoader
-from qlib.data.dataset.handler import DataHandlerLP
 from qlib.contrib.data.loader import Alpha158DL, Alpha360DL
+from qlib.data.dataset.loader import NestedDataLoader
 from qlib.data.dataset.processor import Fillna
-from qlib.data import D
 
 
 class TestDataLoader(unittest.TestCase):
@@ -25,13 +24,22 @@ class TestDataLoader(unittest.TestCase):
                 },
                 {
                     "class": "qlib.contrib.data.loader.Alpha360DL",
-                    "kwargs": {"config": {"label": (["Ref($close, -2)/Ref($close, -1) - 1"], ["LABEL0"])}},
+                    "kwargs": {
+                        "config": {
+                            "label": (
+                                ["Ref($close, -2)/Ref($close, -1) - 1"],
+                                ["LABEL0"],
+                            )
+                        }
+                    },
                 },
             ]
         )
         # Of course you can use StaticDataLoader
 
-        dataset = nd.load(instruments="csi300", start_time="2020-01-01", end_time="2020-01-31")
+        dataset = nd.load(
+            instruments="csi300", start_time="2020-01-01", end_time="2020-01-31"
+        )
 
         assert dataset is not None
 

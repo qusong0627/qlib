@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import List, cast
+from typing import cast, List
 
 import cachetools
 import pandas as pd
@@ -14,7 +14,11 @@ from qlib.backtest.decision import TradeRange, TradeRangeByTime
 from qlib.constant import EPS_T
 from qlib.utils.pickle_utils import restricted_pickle_load
 
-from .base import BaseIntradayBacktestData, BaseIntradayProcessedData, ProcessedDataProvider
+from .base import (
+    BaseIntradayBacktestData,
+    BaseIntradayProcessedData,
+    ProcessedDataProvider,
+)
 
 
 def get_ticks_slice(
@@ -87,13 +91,25 @@ class IntradayBacktestData(BaseIntradayBacktestData):
 class DataframeIntradayBacktestData(BaseIntradayBacktestData):
     """Backtest data from dataframe"""
 
-    def __init__(self, df: pd.DataFrame, price_column: str = "$close0", volume_column: str = "$volume0") -> None:
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        price_column: str = "$close0",
+        volume_column: str = "$volume0",
+    ) -> None:
         self.df = df
         self.price_column = price_column
         self.volume_column = volume_column
 
     def __repr__(self) -> str:
-        with pd.option_context("memory_usage", False, "display.max_info_columns", 1, "display.large_repr", "info"):
+        with pd.option_context(
+            "memory_usage",
+            False,
+            "display.max_info_columns",
+            1,
+            "display.large_repr",
+            "info",
+        ):
             return f"{self.__class__.__name__}({self.df})"
 
     def __len__(self) -> int:
@@ -160,11 +176,17 @@ class HandlerIntradayProcessedData(BaseIntradayProcessedData):
                 df = df.drop(columns=["instrument"])
             return df.set_index(["datetime"])
 
-        path = os.path.join(data_dir, "backtest" if backtest else "feature", f"{stock_id}.pkl")
-        start_time, end_time = date.replace(hour=0, minute=0, second=0), date.replace(hour=23, minute=59, second=59)
+        path = os.path.join(
+            data_dir, "backtest" if backtest else "feature", f"{stock_id}.pkl"
+        )
+        start_time, end_time = date.replace(hour=0, minute=0, second=0), date.replace(
+            hour=23, minute=59, second=59
+        )
         with open(path, "rb") as fstream:
             dataset = restricted_pickle_load(fstream)
-        data = dataset.handler.fetch(pd.IndexSlice[stock_id, start_time:end_time], level=None)
+        data = dataset.handler.fetch(
+            pd.IndexSlice[stock_id, start_time:end_time], level=None
+        )
 
         if index_only:
             self.today = _drop_stock_id(data[[]])
@@ -174,7 +196,14 @@ class HandlerIntradayProcessedData(BaseIntradayProcessedData):
             self.yesterday = _drop_stock_id(data[feature_columns_yesterday])
 
     def __repr__(self) -> str:
-        with pd.option_context("memory_usage", False, "display.max_info_columns", 1, "display.large_repr", "info"):
+        with pd.option_context(
+            "memory_usage",
+            False,
+            "display.max_info_columns",
+            1,
+            "display.large_repr",
+            "info",
+        ):
             return f"{self.__class__.__name__}({self.today}, {self.yesterday})"
 
 
@@ -197,7 +226,13 @@ def load_handler_intraday_processed_data(
     index_only: bool = False,
 ) -> HandlerIntradayProcessedData:
     return HandlerIntradayProcessedData(
-        data_dir, stock_id, date, feature_columns_today, feature_columns_yesterday, backtest, index_only
+        data_dir,
+        stock_id,
+        date,
+        feature_columns_today,
+        feature_columns_yesterday,
+        backtest,
+        index_only,
     )
 
 

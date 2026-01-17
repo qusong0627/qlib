@@ -7,9 +7,8 @@ from typing import Iterable
 import pandas as pd
 import plotly.graph_objs as go
 
-from ..graph import BaseGraph, SubplotsGraph
-
 from ..analysis_position.parse_position import get_position_data
+from ..graph import BaseGraph, SubplotsGraph
 
 
 def _get_cum_return_data_with_position(
@@ -36,7 +35,9 @@ def _get_cum_return_data_with_position(
         end_date=end_date,
     ).copy()
 
-    _cumulative_return_df["label"] = _cumulative_return_df["label"] - _cumulative_return_df["bench"]
+    _cumulative_return_df["label"] = (
+        _cumulative_return_df["label"] - _cumulative_return_df["bench"]
+    )
     _cumulative_return_df = _cumulative_return_df.dropna()
     df_gp = _cumulative_return_df.groupby(level="datetime", group_keys=False)
     result_list = []
@@ -103,7 +104,9 @@ def _get_figure_with_position(
     :return:
     """
 
-    cum_return_df = _get_cum_return_data_with_position(position, report_normal, label_data, start_date, end_date)
+    cum_return_df = _get_cum_return_data_with_position(
+        position, report_normal, label_data, start_date, end_date
+    )
     cum_return_df = cum_return_df.set_index("date")
     # FIXME: support HIGH-FREQ
     cum_return_df.index = cum_return_df.index.strftime("%Y-%m-%d")
@@ -113,10 +116,14 @@ def _get_figure_with_position(
         sub_graph_data = [
             (
                 "cum_{}".format(_t_name),
-                dict(row=1, col=1, graph_kwargs={"mode": "lines+markers", "xaxis": "x3"}),
+                dict(
+                    row=1, col=1, graph_kwargs={"mode": "lines+markers", "xaxis": "x3"}
+                ),
             ),
             (
-                "{}_weight".format(_t_name.replace("minus", "plus") if "minus" in _t_name else _t_name),
+                "{}_weight".format(
+                    _t_name.replace("minus", "plus") if "minus" in _t_name else _t_name
+                ),
                 dict(row=2, col=1),
             ),
             (
@@ -143,8 +150,8 @@ def _get_figure_with_position(
             shapes=[
                 {
                     "type": "line",
-                    "xref": "x2",
-                    "yref": "paper",
+                    "xre": "x2",
+                    "yre": "paper",
                     "x0": mean_value,
                     "y0": 0,
                     "x1": mean_value,
@@ -266,7 +273,9 @@ def cumulative_return_graph(
     position = copy.deepcopy(position)
     report_normal = report_normal.copy()
     label_data.columns = ["label"]
-    _figures = _get_figure_with_position(position, report_normal, label_data, start_date, end_date)
+    _figures = _get_figure_with_position(
+        position, report_normal, label_data, start_date, end_date
+    )
     if show_notebook:
         BaseGraph.show_graph_in_notebook(_figures)
     else:

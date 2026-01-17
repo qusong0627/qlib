@@ -1,11 +1,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-import yaml
 import argparse
 import os
 import shutil
 from copy import deepcopy
+
+import yaml
 
 from qlib.contrib.data.highfreq_provider import HighFreqProvider
 
@@ -15,7 +16,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", type=str, default="config.yml")
     parser.add_argument("-d", "--dest", type=str, default=".")
-    parser.add_argument("-s", "--split", type=str, choices=["none", "date", "stock", "both"], default="stock")
+    parser.add_argument(
+        "-s",
+        "--split",
+        type=str,
+        choices=["none", "date", "stock", "both"],
+        default="stock",
+    )
     args = parser.parse_args()
 
     conf = yaml.load(open(args.config), Loader=loader)
@@ -26,13 +33,17 @@ if __name__ == "__main__":
     provider = HighFreqProvider(**conf)
 
     # Gen dataframe
-    if "feature_conf" in conf:
+    if "feature_con" in conf:
         feature = provider._gen_dataframe(deepcopy(provider.feature_conf))
-    if "backtest_conf" in conf:
+    if "backtest_con" in conf:
         backtest = provider._gen_dataframe(deepcopy(provider.backtest_conf))
 
-    provider.feature_conf["path"] = os.path.splitext(provider.feature_conf["path"])[0] + "/"
-    provider.backtest_conf["path"] = os.path.splitext(provider.backtest_conf["path"])[0] + "/"
+    provider.feature_conf["path"] = (
+        os.path.splitext(provider.feature_conf["path"])[0] + "/"
+    )
+    provider.backtest_conf["path"] = (
+        os.path.splitext(provider.backtest_conf["path"])[0] + "/"
+    )
     # Split by date
     if args.split == "date" or args.split == "both":
         provider._gen_day_dataset(deepcopy(provider.feature_conf), "feature")

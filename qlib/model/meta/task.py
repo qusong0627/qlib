@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 from qlib.data.dataset import Dataset
+
 from ...utils import init_instance_by_config
 
 
@@ -40,7 +41,9 @@ class MetaTask:
             the input for meta model
         """
         self.task = task
-        self.meta_info = meta_info  # the original meta input information, it will be processed later
+        self.meta_info = (
+            meta_info  # the original meta input information, it will be processed later
+        )
         self.mode = mode
 
     def get_dataset(self) -> Dataset:

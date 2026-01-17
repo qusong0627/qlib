@@ -14,36 +14,39 @@ To be honest, design always add burdens. For example,
 - You need to create an experiment before you can get a recorder. (In MLflow, experiments are more like tags, and you often just use a run_id in many interfaces without first defining an experiment.)
 """
 
-from contextlib import contextmanager
-from typing import Text, Optional, Any, Dict
-from .expm import ExpManager
-from .exp import Experiment
-from .recorder import Recorder
-from ..utils import Wrapper
-from ..utils.exceptions import RecorderInitializationError
+from contextlib import contextmanager 
+from typing import Any ,Dict ,Optional ,Text 
+
+from ..utils import Wrapper 
+from ..utils .exceptions import RecorderInitializationError 
+from .exp import Experiment 
+from .expm import ExpManager 
+from .recorder import Recorder 
 
 
-class QlibRecorder:
+class QlibRecorder :
     """
     A global system that helps to manage the experiments.
     """
 
-    def __init__(self, exp_manager: ExpManager):
-        self.exp_manager: ExpManager = exp_manager
+    def __init__ (self ,exp_manager :ExpManager ):
+        self .exp_manager :ExpManager =exp_manager 
 
-    def __repr__(self):
-        return "{name}(manager={manager})".format(name=self.__class__.__name__, manager=self.exp_manager)
+    def __repr__ (self ):
+        return "{name}(manager={manager})".format (
+        name =self .__class__ .__name__ ,manager =self .exp_manager 
+        )
 
-    @contextmanager
-    def start(
-        self,
-        *,
-        experiment_id: Optional[Text] = None,
-        experiment_name: Optional[Text] = None,
-        recorder_id: Optional[Text] = None,
-        recorder_name: Optional[Text] = None,
-        uri: Optional[Text] = None,
-        resume: bool = False,
+    @contextmanager 
+    def start (
+    self ,
+    *,
+    experiment_id :Optional [Text ]=None ,
+    experiment_name :Optional [Text ]=None ,
+    recorder_id :Optional [Text ]=None ,
+    recorder_name :Optional [Text ]=None ,
+    uri :Optional [Text ]=None ,
+    resume :bool =False ,
     ):
         """
         Method to start an experiment. This method can only be called within a Python's `with` statement. Here is the example code:
@@ -79,30 +82,32 @@ class QlibRecorder:
         resume : bool
             whether to resume the specific recorder with given name under the given experiment.
         """
-        run = self.start_exp(
-            experiment_id=experiment_id,
-            experiment_name=experiment_name,
-            recorder_id=recorder_id,
-            recorder_name=recorder_name,
-            uri=uri,
-            resume=resume,
+        run =self .start_exp (
+        experiment_id =experiment_id ,
+        experiment_name =experiment_name ,
+        recorder_id =recorder_id ,
+        recorder_name =recorder_name ,
+        uri =uri ,
+        resume =resume ,
         )
-        try:
-            yield run
-        except Exception as e:
-            self.end_exp(Recorder.STATUS_FA)  # end the experiment if something went wrong
-            raise e
-        self.end_exp(Recorder.STATUS_FI)
+        try :
+            yield run 
+        except Exception as e :
+            self .end_exp (
+            Recorder .STATUS_FA 
+            )# end the experiment if something went wrong
+            raise e 
+        self .end_exp (Recorder .STATUS_FI )
 
-    def start_exp(
-        self,
-        *,
-        experiment_id=None,
-        experiment_name=None,
-        recorder_id=None,
-        recorder_name=None,
-        uri=None,
-        resume=False,
+    def start_exp (
+    self ,
+    *,
+    experiment_id =None ,
+    experiment_name =None ,
+    recorder_id =None ,
+    recorder_name =None ,
+    uri =None ,
+    resume =False ,
     ):
         """
         Lower level method for starting an experiment. When use this method, one should end the experiment manually
@@ -135,16 +140,16 @@ class QlibRecorder:
         -------
         An experiment instance being started.
         """
-        return self.exp_manager.start_exp(
-            experiment_id=experiment_id,
-            experiment_name=experiment_name,
-            recorder_id=recorder_id,
-            recorder_name=recorder_name,
-            uri=uri,
-            resume=resume,
+        return self .exp_manager .start_exp (
+        experiment_id =experiment_id ,
+        experiment_name =experiment_name ,
+        recorder_id =recorder_id ,
+        recorder_name =recorder_name ,
+        uri =uri ,
+        resume =resume ,
         )
 
-    def end_exp(self, recorder_status=Recorder.STATUS_FI):
+    def end_exp (self ,recorder_status =Recorder .STATUS_FI ):
         """
         Method for ending an experiment manually. It will end the current active experiment, as well as its
         active recorder with the specified `status` type. Here is the example code of the method:
@@ -160,9 +165,9 @@ class QlibRecorder:
         status : str
             The status of a recorder, which can be SCHEDULED, RUNNING, FINISHED, FAILED.
         """
-        self.exp_manager.end_exp(recorder_status)
+        self .exp_manager .end_exp (recorder_status )
 
-    def search_records(self, experiment_ids, **kwargs):
+    def search_records (self ,experiment_ids ,**kwargs ):
         """
         Get a pandas DataFrame of records that fit the search criteria.
 
@@ -195,9 +200,9 @@ class QlibRecorder:
         respectively. For records that don't have a particular metric, parameter, or tag, their
         value will be (NumPy) Nan, None, or None respectively.
         """
-        return self.exp_manager.search_records(experiment_ids, **kwargs)
+        return self .exp_manager .search_records (experiment_ids ,**kwargs )
 
-    def list_experiments(self):
+    def list_experiments (self ):
         """
         Method for listing all the existing experiments (except for those being deleted.)
 
@@ -209,9 +214,9 @@ class QlibRecorder:
         -------
         A dictionary (name -> experiment) of experiments information that being stored.
         """
-        return self.exp_manager.list_experiments()
+        return self .exp_manager .list_experiments ()
 
-    def list_recorders(self, experiment_id=None, experiment_name=None):
+    def list_recorders (self ,experiment_id =None ,experiment_name =None ):
         """
         Method for listing all the recorders of experiment with given id or name.
 
@@ -237,11 +242,18 @@ class QlibRecorder:
         -------
         A dictionary (id -> recorder) of recorder information that being stored.
         """
-        return self.get_exp(experiment_id=experiment_id, experiment_name=experiment_name).list_recorders()
+        return self .get_exp (
+        experiment_id =experiment_id ,experiment_name =experiment_name 
+        ).list_recorders ()
 
-    def get_exp(
-        self, *, experiment_id=None, experiment_name=None, create: bool = True, start: bool = False
-    ) -> Experiment:
+    def get_exp (
+    self ,
+    *,
+    experiment_id =None ,
+    experiment_name =None ,
+    create :bool =True ,
+    start :bool =False ,
+    )->Experiment :
         """
         Method for retrieving an experiment with given id or name. Once the `create` argument is set to
         True, if no valid experiment is found, this method will create one for you. Otherwise, it will
@@ -315,14 +327,14 @@ class QlibRecorder:
         -------
         An experiment instance with given id or name.
         """
-        return self.exp_manager.get_exp(
-            experiment_id=experiment_id,
-            experiment_name=experiment_name,
-            create=create,
-            start=start,
+        return self .exp_manager .get_exp (
+        experiment_id =experiment_id ,
+        experiment_name =experiment_name ,
+        create =create ,
+        start =start ,
         )
 
-    def delete_exp(self, experiment_id=None, experiment_name=None):
+    def delete_exp (self ,experiment_id =None ,experiment_name =None ):
         """
         Method for deleting the experiment with given id or name. At least one of id or name must be given,
         otherwise, error will occur.
@@ -340,9 +352,9 @@ class QlibRecorder:
         experiment_name : str
             name of the experiment.
         """
-        self.exp_manager.delete_exp(experiment_id, experiment_name)
+        self .exp_manager .delete_exp (experiment_id ,experiment_name )
 
-    def get_uri(self):
+    def get_uri (self ):
         """
         Method for retrieving the uri of current experiment manager.
 
@@ -356,9 +368,9 @@ class QlibRecorder:
         -------
         The uri of current experiment manager.
         """
-        return self.exp_manager.uri
+        return self .exp_manager .uri 
 
-    def set_uri(self, uri: Optional[Text]):
+    def set_uri (self ,uri :Optional [Text ]):
         """
         Method to reset the **default** uri of current experiment manager.
 
@@ -367,10 +379,10 @@ class QlibRecorder:
         - When the uri is refer to a file path, please using the absolute path instead of strings like "~/mlruns/"
           The backend don't support strings like this.
         """
-        self.exp_manager.default_uri = uri
+        self .exp_manager .default_uri =uri 
 
-    @contextmanager
-    def uri_context(self, uri: Text):
+    @contextmanager 
+    def uri_context (self ,uri :Text ):
         """
         Temporarily set the exp_manager's **default_uri** to uri
 
@@ -382,21 +394,21 @@ class QlibRecorder:
         uri : Text
             the temporal uri
         """
-        prev_uri = self.exp_manager.default_uri
-        self.exp_manager.default_uri = uri
-        try:
-            yield
-        finally:
-            self.exp_manager.default_uri = prev_uri
+        prev_uri =self .exp_manager .default_uri 
+        self .exp_manager .default_uri =uri 
+        try :
+            yield 
+        finally :
+            self .exp_manager .default_uri =prev_uri 
 
-    def get_recorder(
-        self,
-        *,
-        recorder_id=None,
-        recorder_name=None,
-        experiment_id=None,
-        experiment_name=None,
-    ) -> Recorder:
+    def get_recorder (
+    self ,
+    *,
+    recorder_id =None ,
+    recorder_name =None ,
+    experiment_id =None ,
+    experiment_name =None ,
+    )->Recorder :
         """
         Method for retrieving a recorder.
 
@@ -454,11 +466,11 @@ class QlibRecorder:
         -------
         A recorder instance.
         """
-        return self.get_exp(experiment_name=experiment_name, experiment_id=experiment_id, create=False).get_recorder(
-            recorder_id, recorder_name, create=False, start=False
-        )
+        return self .get_exp (
+        experiment_name =experiment_name ,experiment_id =experiment_id ,create =False 
+        ).get_recorder (recorder_id ,recorder_name ,create =False ,start =False )
 
-    def delete_recorder(self, recorder_id=None, recorder_name=None):
+    def delete_recorder (self ,recorder_id =None ,recorder_name =None ):
         """
         Method for deleting the recorders with given id or name. At least one of id or name must be given,
         otherwise, error will occur.
@@ -476,9 +488,11 @@ class QlibRecorder:
         recorder_name : str
             name of the experiment.
         """
-        self.get_exp().delete_recorder(recorder_id, recorder_name)
+        self .get_exp ().delete_recorder (recorder_id ,recorder_name )
 
-    def save_objects(self, local_path=None, artifact_path=None, **kwargs: Dict[Text, Any]):
+    def save_objects (
+    self ,local_path =None ,artifact_path =None ,**kwargs :Dict [Text ,Any ]
+    ):
         """
         Method for saving objects as artifacts in the experiment to the uri. It supports either saving
         from a local file/directory, or directly saving objects. User can use valid python's keywords arguments
@@ -527,19 +541,21 @@ class QlibRecorder:
             the object to be saved.
             For example, `{"pred.pkl": pred}`
         """
-        if local_path is not None and len(kwargs) > 0:
-            raise ValueError(
-                "You can choose only one of `local_path`(save the files in a path) or `kwargs`(pass in the objects directly)"
+        if local_path is not None and len (kwargs )>0 :
+            raise ValueError (
+            "You can choose only one of `local_path`(save the files in a path) or `kwargs`(pass in the objects directly)"
             )
-        self.get_exp().get_recorder(start=True).save_objects(local_path, artifact_path, **kwargs)
+        self .get_exp ().get_recorder (start =True ).save_objects (
+        local_path ,artifact_path ,**kwargs 
+        )
 
-    def load_object(self, name: Text):
+    def load_object (self ,name :Text ):
         """
         Method for loading an object from artifacts in the experiment in the uri.
         """
-        return self.get_exp().get_recorder(start=True).load_object(name)
+        return self .get_exp ().get_recorder (start =True ).load_object (name )
 
-    def log_params(self, **kwargs):
+    def log_params (self ,**kwargs ):
         """
         Method for logging parameters during an experiment. In addition to using ``R``, one can also log to a specific recorder after getting it with `get_recorder` API.
 
@@ -562,9 +578,9 @@ class QlibRecorder:
         keyword argument:
             name1=value1, name2=value2, ...
         """
-        self.get_exp(start=True).get_recorder(start=True).log_params(**kwargs)
+        self .get_exp (start =True ).get_recorder (start =True ).log_params (**kwargs )
 
-    def log_metrics(self, step=None, **kwargs):
+    def log_metrics (self ,step =None ,**kwargs ):
         """
         Method for logging metrics during an experiment. In addition to using ``R``, one can also log to a specific recorder after getting it with `get_recorder` API.
 
@@ -587,9 +603,9 @@ class QlibRecorder:
         keyword argument:
             name1=value1, name2=value2, ...
         """
-        self.get_exp(start=True).get_recorder(start=True).log_metrics(step, **kwargs)
+        self .get_exp (start =True ).get_recorder (start =True ).log_metrics (step ,**kwargs )
 
-    def log_artifact(self, local_path: str, artifact_path: Optional[str] = None):
+    def log_artifact (self ,local_path :str ,artifact_path :Optional [str ]=None ):
         """
         Log a local file or directory as an artifact of the currently active run
 
@@ -603,9 +619,11 @@ class QlibRecorder:
         artifact_path : Optional[str]
             If provided, the directory in ``artifact_uri`` to write to.
         """
-        self.get_exp(start=True).get_recorder(start=True).log_artifact(local_path, artifact_path)
+        self .get_exp (start =True ).get_recorder (start =True ).log_artifact (
+        local_path ,artifact_path 
+        )
 
-    def download_artifact(self, path: str, dst_path: Optional[str] = None) -> str:
+    def download_artifact (self ,path :str ,dst_path :Optional [str ]=None )->str :
         """
         Download an artifact file or directory from a run to a local directory if applicable,
         and return a local path for it.
@@ -625,9 +643,11 @@ class QlibRecorder:
         str
             Local path of desired artifact.
         """
-        self.get_exp(start=True).get_recorder(start=True).download_artifact(path, dst_path)
+        self .get_exp (start =True ).get_recorder (start =True ).download_artifact (
+        path ,dst_path 
+        )
 
-    def set_tags(self, **kwargs):
+    def set_tags (self ,**kwargs ):
         """
         Method for setting tags for a recorder. In addition to using ``R``, one can also set the tag to a specific recorder after getting it with `get_recorder` API.
 
@@ -650,32 +670,32 @@ class QlibRecorder:
         keyword argument:
             name1=value1, name2=value2, ...
         """
-        self.get_exp(start=True).get_recorder(start=True).set_tags(**kwargs)
+        self .get_exp (start =True ).get_recorder (start =True ).set_tags (**kwargs )
 
 
-class RecorderWrapper(Wrapper):
+class RecorderWrapper (Wrapper ):
     """
     Wrapper class for QlibRecorder, which detects whether users reinitialize qlib when already starting an experiment.
     """
 
-    def register(self, provider):
-        if self._provider is not None:
-            expm = getattr(self._provider, "exp_manager")
-            if expm.active_experiment is not None:
-                raise RecorderInitializationError(
-                    "Please don't reinitialize Qlib if QlibRecorder is already activated. Otherwise, the experiment stored location will be modified."
+    def register (self ,provider ):
+        if self ._provider is not None :
+            expm =getattr (self ._provider ,"exp_manager")
+            if expm .active_experiment is not None :
+                raise RecorderInitializationError (
+                "Please don't reinitialize Qlib if QlibRecorder is already activated. Otherwise, the experiment stored location will be modified."
                 )
-        self._provider = provider
+        self ._provider =provider 
 
 
-import sys
+import sys 
 
-if sys.version_info >= (3, 9):
-    from typing import Annotated
+if sys .version_info >=(3 ,9 ):
+    from typing import Annotated 
 
-    QlibRecorderWrapper = Annotated[QlibRecorder, RecorderWrapper]
-else:
-    QlibRecorderWrapper = QlibRecorder
+    QlibRecorderWrapper =Annotated [QlibRecorder ,RecorderWrapper ]
+else :
+    QlibRecorderWrapper =QlibRecorder 
 
-# global record
-R: QlibRecorderWrapper = RecorderWrapper()
+    # global record
+R :QlibRecorderWrapper =RecorderWrapper ()

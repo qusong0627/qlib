@@ -91,8 +91,8 @@ class RestrictedUnpickler(pickle.Unpickler):
 
         raise pickle.UnpicklingError(
             f"Forbidden class: {module}.{name}. "
-            f"Only whitelisted classes are allowed for security reasons. "
-            f"This is to prevent arbitrary code execution through pickle deserialization."
+            "Only whitelisted classes are allowed for security reasons. "
+            "This is to prevent arbitrary code execution through pickle deserialization."
         )
 
 

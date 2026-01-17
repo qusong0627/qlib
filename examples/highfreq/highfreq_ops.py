@@ -1,11 +1,7 @@
-import numpy as np
 import pandas as pd
-import importlib
-from qlib.data.ops import ElemOperator, PairOperator
-from qlib.config import C
-from qlib.data.cache import H
-from qlib.data.data import Cal
+
 from qlib.contrib.ops.high_freq import get_calendar_day
+from qlib.data.ops import ElemOperator, PairOperator
 
 
 class DayLast(ElemOperator):
@@ -25,7 +21,9 @@ class DayLast(ElemOperator):
     def _load_internal(self, instrument, start_index, end_index, freq):
         _calendar = get_calendar_day(freq=freq)
         series = self.feature.load(instrument, start_index, end_index, freq)
-        return series.groupby(_calendar[series.index], group_keys=False).transform("last")
+        return series.groupby(_calendar[series.index], group_keys=False).transform(
+            "last"
+        )
 
 
 class FFillNan(ElemOperator):
@@ -104,8 +102,12 @@ class Select(PairOperator):
     """
 
     def _load_internal(self, instrument, start_index, end_index, freq):
-        series_condition = self.feature_left.load(instrument, start_index, end_index, freq)
-        series_feature = self.feature_right.load(instrument, start_index, end_index, freq)
+        series_condition = self.feature_left.load(
+            instrument, start_index, end_index, freq
+        )
+        series_feature = self.feature_right.load(
+            instrument, start_index, end_index, freq
+        )
         return series_feature.loc[series_condition]
 
 

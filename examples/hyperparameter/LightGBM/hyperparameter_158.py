@@ -1,9 +1,10 @@
-import qlib
 import optuna
+
+import qlib
 from qlib.constant import REG_CN
-from qlib.utils import init_instance_by_config
 from qlib.tests.config import CSI300_DATASET_CONFIG
 from qlib.tests.data import GetData
+from qlib.utils import init_instance_by_config
 
 
 def objective(trial):
@@ -23,7 +24,7 @@ def objective(trial):
                 "feature_fraction": trial.suggest_uniform("feature_fraction", 0.4, 1.0),
                 "bagging_fraction": trial.suggest_uniform("bagging_fraction", 0.4, 1.0),
                 "bagging_freq": trial.suggest_int("bagging_freq", 1, 7),
-                "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 50),
+                "min_data_in_lea": trial.suggest_int("min_data_in_lea", 1, 50),
                 "min_child_samples": trial.suggest_int("min_child_samples", 5, 100),
             },
         },

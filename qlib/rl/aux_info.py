@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+from typing import Generic, Optional, TYPE_CHECKING, TypeVar
 
 from qlib.typehint import final
 

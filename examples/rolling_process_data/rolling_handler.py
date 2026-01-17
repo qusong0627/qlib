@@ -1,6 +1,5 @@
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.data.dataset.loader import DataLoaderDH
 from qlib.contrib.data.handler import check_transform_proc
+from qlib.data.dataset.handler import DataHandlerLP
 
 
 class RollingDataHandler(DataHandlerLP):
@@ -14,8 +13,12 @@ class RollingDataHandler(DataHandlerLP):
         fit_end_time=None,
         data_loader_kwargs={},
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "DataLoaderDH",

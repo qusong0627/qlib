@@ -12,9 +12,11 @@ reduce: {(A,B): {C1: object, C2: object}} -> {(A,B): object}
 
 """
 
-from qlib.model.ens.ensemble import Ensemble, RollingEnsemble
 from typing import Callable
-from joblib import Parallel, delayed
+
+from joblib import delayed, Parallel
+
+from qlib.model.ens.ensemble import Ensemble, RollingEnsemble
 
 
 class Group:
@@ -48,7 +50,7 @@ class Group:
         if isinstance(getattr(self, "_group_func", None), Callable):
             return self._group_func(*args, **kwargs)
         else:
-            raise NotImplementedError(f"Please specify valid `group_func`.")
+            raise NotImplementedError("Please specify valid `group_func`.")
 
     def reduce(self, *args, **kwargs) -> dict:
         """
@@ -62,9 +64,11 @@ class Group:
         if isinstance(getattr(self, "_ens_func", None), Callable):
             return self._ens_func(*args, **kwargs)
         else:
-            raise NotImplementedError(f"Please specify valid `_ens_func`.")
+            raise NotImplementedError("Please specify valid `_ens_func`.")
 
-    def __call__(self, ungrouped_dict: dict, n_jobs: int = 1, verbose: int = 0, *args, **kwargs) -> dict:
+    def __call__(
+        self, ungrouped_dict: dict, n_jobs: int = 1, verbose: int = 0, *args, **kwargs
+    ) -> dict:
         """
         Group the ungrouped_dict into different groups.
 

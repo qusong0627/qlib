@@ -4,15 +4,19 @@
 """Commonly used types."""
 
 import sys
-from typing import Union
 from pathlib import Path
+from typing import Union
 
 __all__ = ["Literal", "TypedDict", "final"]
 
 if sys.version_info >= (3, 8):
-    from typing import Literal, TypedDict, final  # type: ignore  # pylint: disable=no-name-in-module
+    from typing import (  # type: ignore  # pylint: disable=no-name-in-module
+        final,
+        Literal,
+        TypedDict,
+    )
 else:
-    from typing_extensions import Literal, TypedDict, final
+    from typing_extensions import final, Literal, TypedDict
 
 
 class InstDictConf(TypedDict):

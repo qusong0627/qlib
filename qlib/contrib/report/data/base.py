@@ -8,8 +8,9 @@ Assumptions
 
 """
 import pandas as pd
-from qlib.log import TimeInspector
+
 from qlib.contrib.report.utils import sub_fig_generator
+from qlib.log import TimeInspector
 
 
 class FeaAnalyser:
@@ -40,7 +41,7 @@ class FeaAnalyser:
         pass
 
     def plot_single(self, col, ax):
-        raise NotImplementedError(f"This type of input is not supported")
+        raise NotImplementedError("This type of input is not supported")
 
     def skip(self, col):
         return False

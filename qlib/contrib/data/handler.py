@@ -1,12 +1,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+from inspect import getfullargspec
+
 from qlib.contrib.data.loader import Alpha158DL, Alpha360DL
+
+from ...data.dataset import processor as processor_module
 from ...data.dataset.handler import DataHandlerLP
 from ...data.dataset.processor import Processor
 from ...utils import get_callable_kwargs
-from ...data.dataset import processor as processor_module
-from inspect import getfullargspec
 
 
 def check_transform_proc(proc_l, fit_start_time, fit_end_time):
@@ -39,7 +41,7 @@ _DEFAULT_LEARN_PROCESSORS = [
     {"class": "CSZScoreNorm", "kwargs": {"fields_group": "label"}},
 ]
 _DEFAULT_INFER_PROCESSORS = [
-    {"class": "ProcessInf", "kwargs": {}},
+    {"class": "ProcessIn", "kwargs": {}},
     {"class": "ZScoreNorm", "kwargs": {}},
     {"class": "Fillna", "kwargs": {}},
 ]
@@ -60,8 +62,12 @@ class Alpha360(DataHandlerLP):
         inst_processors=None,
         **kwargs,
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "QlibDataLoader",
@@ -111,8 +117,12 @@ class Alpha158(DataHandlerLP):
         inst_processors=None,
         **kwargs,
     ):
-        infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
-        learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
+        infer_processors = check_transform_proc(
+            infer_processors, fit_start_time, fit_end_time
+        )
+        learn_processors = check_transform_proc(
+            learn_processors, fit_start_time, fit_end_time
+        )
 
         data_loader = {
             "class": "QlibDataLoader",

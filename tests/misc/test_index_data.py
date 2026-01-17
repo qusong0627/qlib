@@ -1,8 +1,9 @@
+import unittest
+
 import numpy as np
 import pandas as pd
-import qlib.utils.index_data as idd
 
-import unittest
+import qlib.utils.index_data as idd
 
 
 class IndexDataTest(unittest.TestCase):
@@ -20,7 +21,7 @@ class IndexDataTest(unittest.TestCase):
             idd.SingleData(range(10), index=["foo", "bar"])
 
         # test indexing
-        sd = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "f", "g"])
+        sd = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "", "g"])
         print(sd)
         print(sd.iloc[1])  # get second row
 
@@ -37,15 +38,17 @@ class IndexDataTest(unittest.TestCase):
 
     def test_index_multi_data(self):
         # Auto broadcast for scalar
-        sd = idd.MultiData(0, index=["foo", "bar"], columns=["f", "g"])
+        sd = idd.MultiData(0, index=["foo", "bar"], columns=["", "g"])
         print(sd)
 
         # Bad case: the input is not aligned
         with self.assertRaises(ValueError):
-            idd.MultiData(range(10), index=["foo", "bar"], columns=["f", "g"])
+            idd.MultiData(range(10), index=["foo", "bar"], columns=["", "g"])
 
         # test indexing
-        sd = idd.MultiData(np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["f", "g"])
+        sd = idd.MultiData(
+            np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["", "g"]
+        )
         print(sd)
         print(sd.iloc[1])  # get second row
 
@@ -62,7 +65,9 @@ class IndexDataTest(unittest.TestCase):
         print(sd.loc[:, "g":])
 
     def test_sorting(self):
-        sd = idd.MultiData(np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["f", "g"])
+        sd = idd.MultiData(
+            np.arange(4).reshape(2, 2), index=["foo", "bar"], columns=["", "g"]
+        )
         print(sd)
         sd.sort_index()
 
@@ -70,7 +75,9 @@ class IndexDataTest(unittest.TestCase):
         print(sd.loc[:"c"])
 
     def test_corner_cases(self):
-        sd = idd.MultiData([[1, 2], [3, np.nan]], index=["foo", "bar"], columns=["f", "g"])
+        sd = idd.MultiData(
+            [[1, 2], [3, np.nan]], index=["foo", "bar"], columns=["", "g"]
+        )
         print(sd)
 
         self.assertTrue(np.isnan(sd.loc["bar", "g"]))
@@ -89,7 +96,7 @@ class IndexDataTest(unittest.TestCase):
             sd.loc["foo"]
 
         # replace
-        sd = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "f", "g"])
+        sd = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "", "g"])
         sd = sd.replace(dict(zip(range(1, 5), range(2, 6))))
         print(sd)
         self.assertTrue(sd.iloc[0] == 2)
@@ -113,27 +120,29 @@ class IndexDataTest(unittest.TestCase):
             sd = idd.SingleData([1, 2, 3], index=timeindex)
 
     def test_ops(self):
-        sd1 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "f", "g"])
-        sd2 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "f", "g"])
+        sd1 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "", "g"])
+        sd2 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "", "g"])
         print(sd1 + sd2)
         new_sd = sd2 * 2
         self.assertTrue(new_sd.index == sd2.index)
 
-        sd1 = idd.SingleData([1, 2, None, 4], index=["foo", "bar", "f", "g"])
-        sd2 = idd.SingleData([1, 2, 3, None], index=["foo", "bar", "f", "g"])
+        sd1 = idd.SingleData([1, 2, None, 4], index=["foo", "bar", "", "g"])
+        sd2 = idd.SingleData([1, 2, 3, None], index=["foo", "bar", "", "g"])
         self.assertTrue(np.isnan((sd1 + sd2).iloc[3]))
         self.assertTrue(sd1.add(sd2).sum() == 13)
 
-        self.assertTrue(idd.sum_by_index([sd1, sd2], sd1.index, fill_value=0.0).sum() == 13)
+        self.assertTrue(
+            idd.sum_by_index([sd1, sd2], sd1.index, fill_value=0.0).sum() == 13
+        )
 
     def test_todo(self):
         pass
         # here are some examples which do not affect the current system, but it is weird not to support it
-        # sd2 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "f", "g"])
+        # sd2 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "", "g"])
         # 2 * sd2
 
     def test_squeeze(self):
-        sd1 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "f", "g"])
+        sd1 = idd.SingleData([1, 2, 3, 4], index=["foo", "bar", "", "g"])
         # automatically squeezing
         self.assertTrue(not isinstance(np.nansum(sd1), idd.IndexData))
         self.assertTrue(not isinstance(np.sum(sd1), idd.IndexData))
